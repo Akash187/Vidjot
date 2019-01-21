@@ -1,0 +1,10 @@
+{
+  "name": "Vidjot",
+  "version": "1.0.0",
+  "description": "A Node.js based app to list idea for YouTube video with authentication and full CRUD operation.",
+  "main": "server.js",
+  "repository": "https://github.com/Akash187/Vidjot.git",
+  "author": "Akash Kumar Seth",
+  "license": "MIT",
+  "private": true
+}
