@@ -1,0 +1,22 @@
+<div class="container my-3">
+  {{#each ideas}}
+    <div class="card my-2">
+      <div class="card-body">
+        <h4 class="card-title font-weight-bold">{{this.title}}</h4>
+        <p>{{this.detail}}</p>
+        <button onclick="editIdea()" class="btn btn-dark">Edit</button>
+        <button onclick="deleteIdea()" class="btn btn-danger">Delete</button>
+      </div>
+    </div>
+  {{/each}}
+</div>
+
+<script>
+  function editIdea() {
+    console.log("Editing");
+  }
+
+  function deleteIdea() {
+    console.log("Delete");
+  }
+</script>
