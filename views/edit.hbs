@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-body">
       <h4 class="card-title font-weight-bold">Video Idea</h4>
-      <form onsubmit="editIdea()">
+      <form onsubmit="editIdea(this)" id="{{id}}">
         <div class="form-group">
           <label for="inputTitle">Title</label>
           <input type="text" class="form-control" id="inputTitle" value="{{ideaTitle}}" required>
@@ -18,8 +18,34 @@
 </div>
 
 <script>
-  function editIdea() {
+  function editIdea(elm) {
+    event.preventDefault();
+    event.stopPropagation();
     let title = document.getElementById('inputTitle').value;
     let detail = document.getElementById('inputDetail').value;
+    console.log(title + " " + detail);
+    fetch('http://localhost:3000/idea/edit/' + elm.id, {
+      method: 'PUT',
+      headers: {
+        "Content-Type": "application/json",
+        'auth': '1234'
+      },
+      body: JSON.stringify({
+        title: title,
+        detail: detail
+      })
+    })
+    .then(function (data) {
+      if(data.status === 200) {
+        console.log('Request success: ', data);
+        window.location.replace("http://localhost:3000/ideas");
+      }
+      else{
+        console.log('Request Failed: ', data);
+      }
+    })
+    .catch(function (error) {
+      console.log('Request failure: ', error);
+    });
   }
 </script>

@@ -21,5 +21,29 @@
   function submitIdea() {
     let title = document.getElementById('inputTitle').value;
     let detail = document.getElementById('inputDetail').value;
+    console.log(title + " " + detail);
+    fetch('http://localhost:3000/idea/add', {
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+        'auth': '1234'
+      },
+      body: JSON.stringify({
+        title: title,
+        detail: detail
+      })
+    })
+    .then(function (data) {
+      if(data.status === 200) {
+        console.log('Request success: ', data);
+        window.location.replace("http://localhost:3000/ideas");
+      }
+      else{
+        console.log('Request Failed: ', data);
+      }
+    })
+    .catch(function (error) {
+      console.log('Request failure: ', error);
+    });
   }
 </script>

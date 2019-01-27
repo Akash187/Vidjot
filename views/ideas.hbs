@@ -4,19 +4,33 @@
       <div class="card-body">
         <h4 class="card-title font-weight-bold">{{this.title}}</h4>
         <p>{{this.detail}}</p>
-        <button onclick="editIdea()" class="btn btn-dark">Edit</button>
-        <button onclick="deleteIdea()" class="btn btn-danger">Delete</button>
+        <div class="d-flex justify-content-between flex-wrap">
+          <div>
+            <button onclick="editIdea(this)" id="{{this._id}}" class="btn btn-dark">Edit</button>
+            <button onclick="deleteIdea(this)" id="{{this._id}}" class="btn btn-danger">Delete</button>
+          </div>
+          <div class="align-self-center">
+            <p><b>Added:</b> {{this.updatedAt}}</p>
+          </div>
+        </div>
       </div>
     </div>
   {{/each}}
 </div>
 
 <script>
-  function editIdea() {
-    console.log("Editing");
+  function editIdea(elm) {
+    location.href = "idea/edit/" + elm.id;
   }
 
-  function deleteIdea() {
-    console.log("Delete");
+  function deleteIdea(elm) {
+    fetch("http://localhost:3000/ideas/" + elm.id, {
+      method: 'delete'
+    })
+        .then(response => response.json())
+        .then((data) => {
+          location.reload();
+        })
+        .catch(e => console.log('Error Deleting item', e));
   }
 </script>

@@ -1,7 +1,15 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
+const moment = require('moment');
+const _ = require('lodash');
 
+const {mongoose} = require('./db/mongoose');
+const {Idea} = require('./modals/idea');
 const app = express();
+
+app.use(bodyParser.json());
 
 app.use(express.static('public'));
 app.engine('hbs', exphbs({defaultLayout: 'main.hbs'}));
@@ -11,30 +19,102 @@ app.get('/', (req, res) => {
   res.render('index', {title: 'Home Page', auth: true});
 });
 
-app.get('/login', (req, res) => {
-  res.render('login', {title: 'Login Page'});
-});
-
-app.get('/register', (req, res) => {
-  res.render('register', {title: 'Register Page'});
-});
-
 app.get('/about', (req, res) => {
   res.render('about', {title: 'About Page'});
 });
 
 app.get('/ideas', (req, res) => {
-  res.render('ideas', {title: 'Ideas Page', auth: true, ideas: [{title: "Build a News Feed with Nuxt 2 and Firestore",
-    detail: "Full CRUD functionality (create, read, update, delete) with the new real-time NoSQL Firestore Database Comprehensive work with News API in order to dynamically fetch top headlines around the world (by news category, by country, by news source, etc)."}, {title: "Build a News Feed with Nuxt 2 and Firestore",
-      detail: "Full CRUD functionality (create, read, update, delete) with the new real-time NoSQL Firestore Database Comprehensive work with News API in order to dynamically fetch top headlines around the world (by news category, by country, by news source, etc)."}]});
+  Idea.find().sort( { updatedAt: -1 }) .then((ideas) => {
+    const modifiedIdeas = ideas.map(idea =>
+        ({updatedAt: moment.unix(idea.updatedAt).fromNow(), _id: idea._id, title: idea.title, detail: idea.detail})
+    );
+    res.render('ideas', {title: 'Ideas Page', auth: true, ideas: modifiedIdeas});
+  }, (e) => {
+    res.status(400).send(e);
+  });
+}, (e) => {
+  console.log("Error in get /ideas");
 });
 
 app.get('/idea/add', (req, res) => {
   res.render('add', {title: 'Add Page', auth: true});
 });
 
-app.get('/idea/edit', (req, res) => {
-  res.render('edit', {title: 'Edit Page', ideaTitle: 'Hello hi there!', auth: true});
+app.post('/idea/add', (req, res) => {
+  console.log("Route Called!" + req.body.title + " " + req.body.detail);
+  let idea = new Idea({
+    title: req.body.title,
+    detail: req.body.detail,
+    updatedAt: moment().unix()
+  });
+  idea.save().then((doc) => {
+    res.send(doc);
+  }, (e) => {
+    res.status(400).send(e);
+  });
+}, (e) => {
+  console.log("Error in post /idea/add");
+});
+
+app.get('/idea/edit/:id', (req, res) => {
+  let id = req.params.id;
+
+  Idea.find({_id :id})
+    .then((idea) => {
+      if (!idea) {
+        return res.status(404).send();
+      }
+      res.render('edit', {ideaTitle: idea[0].title, ideaDetail: idea[0].detail, id: idea[0]._id, auth: true});
+    }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
+app.put('/idea/edit/:id', (req, res) => {
+  let id = req.params.id;
+  let body = _.pick(req.body, ['title', 'detail']);
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  Idea.findOneAndUpdate(
+    {_id :id},
+    {$set: body},
+    {new: true})
+    .then((idea) => {
+      if (!idea) {
+        return res.status(404).send();
+      }
+      res.send({idea});
+    }).catch((e) => {
+    res.status(400).send();
+  })
+});
+
+app.delete('/ideas/:id', (req, res) => {
+  let id = req.params.id;
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+  Idea.findOneAndRemove({
+    _id: id
+  }).then((idea) => {
+    if (!idea) {
+      return res.status(404).send();
+    }
+    return res.send({idea});
+  }).catch((e) => {
+    res.status(400).send();
+  });
+});
+
+app.get('/login', (req, res) => {
+  res.render('login', {title: 'Login Page'});
+});
+
+app.get('/register', (req, res) => {
+  res.render('register', {title: 'Register Page'});
 });
 
 app.listen(3000, () => {
