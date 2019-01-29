@@ -51,7 +51,7 @@ let UserSchema = new mongoose.Schema({
 UserSchema.methods.toJSON = function(){
   let user = this;
   let userObject = user.toObject();
-  return _.pick(userObject, ['_id', 'email']);
+  return _.pick(userObject, ['_id', 'name', 'email']);
 };
 
 UserSchema.methods.generateAuthToken = function(){
@@ -73,23 +73,23 @@ UserSchema.methods.generateAuthToken = function(){
 //   })
 // };
 //
-// UserSchema.statics.findByToken = function (token) {
-//   let User = this;
-//   let decoded;
-//   try{
-//     decoded = jwt.verify(token, process.env.JWT_SECRET);
-//   }catch(e){
-//     // return new Promise((resolve, reject) => {
-//     //   reject();
-//     // });
-//     return Promise.reject('');
-//   }
-//   return User.findOne({
-//     '_id': decoded._id,
-//     'tokens.token': token,
-//     'tokens.access' : 'auth'
-//   })
-// };
+UserSchema.statics.findByToken = function (token) {
+  let User = this;
+  let decoded;
+  try{
+    decoded = jwt.verify(token, '123abc');
+  }catch(e){
+    // return new Promise((resolve, reject) => {
+    //   reject();
+    // });
+    return Promise.reject('');
+  }
+  return User.findOne({
+    '_id': decoded._id,
+    'tokens.token': token,
+    'tokens.access' : 'auth'
+  })
+};
 //
 // UserSchema.statics.findByCredentials = function (email, password) {
 //   let User = this;

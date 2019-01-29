@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const moment = require('moment');
 const _ = require('lodash');
+const {authenticate} = require("./middleware/authenticate");
 
 const {mongoose} = require('./db/mongoose');
 const {Idea} = require('./modals/idea');
@@ -129,6 +130,10 @@ app.post('/register', (req, res) => {
   }).catch((e) => {
     res.status(400).send(e);
   })
+});
+
+app.get('/users/me', authenticate, (req, res) => {
+  res.send(req.user);
 });
 
 app.listen(3000, () => {
