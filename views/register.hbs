@@ -1,4 +1,4 @@
-<div class="container mt-2" id="alert">
+<div class="container mt-2" id="alert" style="position: fixed; top: 1rem; z-index: 999">
 </div>
 <div class="container my-3 d-flex justify-content-center">
   <div class="card" style="width: 36rem;">
@@ -49,27 +49,56 @@
     document.getElementsByClassName('needs-validation')[0].classList.add('was-validated');
 
     if(validPassword && password === confirmPassword && name && email) {
-
+      stopPageRefresh();
+      fetch('http://localhost:3000/register', {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+          'auth': '1234'
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password
+        })
+      })
+      .then(function (data) {
+        if(data.status === 200) {
+          console.log('Request success: ', data);
+          window.location.replace("http://localhost:3000/");
+        }
+        else{
+          return showAlert('alert-warning', 'Problem Registering Server Error.');
+        }
+      })
+      .catch(function (error) {
+        return showAlert('alert-warning', 'Problem Registering. Check Internet connection');
+      });
     }else {
-      event.preventDefault();
-      event.stopPropagation();
+      stopPageRefresh();
       if(!validPassword && password){
-        $('.alert').alert();
-        return document.getElementById('alert').innerHTML = alertText('alert-warning', 'Password must be at least 6 characters.');
+        return showAlert('alert-warning', 'Password must be at least 6 characters.');
       }
       if(password !== confirmPassword){
-        $('.alert').alert();
-        return document.getElementById('alert').innerHTML = alertText('alert-warning', 'Password do not match.');
+
+        return  showAlert('alert-warning', 'Password did not Match.');
       }
     }
   }
 
-  alertText = function (type, text) {
-    return `<div class="alert ${type} alert-dismissible fade show"  id="alert" role="alert">
+  function stopPageRefresh() {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function showAlert(type, text) {
+    $('.alert').alert();
+    document.getElementById('alert').innerHTML = `<div class="alert ${type} alert-dismissible fade show"  id="alert" role="alert">
               <div id="alert-text">${text}</div>
               <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
               </button>
             </div>`;
   }
+
 </script>

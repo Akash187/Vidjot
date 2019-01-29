@@ -21,7 +21,6 @@
   function submitIdea() {
     let title = document.getElementById('inputTitle').value;
     let detail = document.getElementById('inputDetail').value;
-    console.log(title + " " + detail);
     fetch('http://localhost:3000/idea/add', {
       method: 'POST',
       headers: {

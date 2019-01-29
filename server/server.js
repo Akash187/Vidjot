@@ -7,6 +7,7 @@ const _ = require('lodash');
 
 const {mongoose} = require('./db/mongoose');
 const {Idea} = require('./modals/idea');
+const {User} = require("./modals/user");
 const app = express();
 
 app.use(bodyParser.json());
@@ -115,6 +116,19 @@ app.get('/login', (req, res) => {
 
 app.get('/register', (req, res) => {
   res.render('register', {title: 'Register Page'});
+});
+
+app.post('/register', (req, res) => {
+  let body = _.pick(req.body, ['name', 'email', 'password']);
+  let user = new User(body);
+
+  user.save().then(() => {
+    return user.generateAuthToken();
+  }).then((token) => {
+    res.header('x-auth', token).send(user);
+  }).catch((e) => {
+    res.status(400).send(e);
+  })
 });
 
 app.listen(3000, () => {
