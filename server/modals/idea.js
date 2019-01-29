@@ -18,6 +18,10 @@ let Idea = mongoose.model('Idea', {
   updatedAt: {
     type: Number,
     required: true
+  },
+  _creator: {
+    required: true,
+    type: mongoose.Schema.Types.ObjectId
   }
 });
 

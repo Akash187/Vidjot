@@ -25,29 +25,33 @@ app.get('/about', (req, res) => {
   res.render('about', {title: 'About Page'});
 });
 
-app.get('/ideas', (req, res) => {
-  Idea.find().sort( { updatedAt: -1 }) .then((ideas) => {
-    const modifiedIdeas = ideas.map(idea =>
+app.get('/ideas', authenticate, (req, res) => {
+  Idea.find({_creator: req.user._id})
+    .sort( { updatedAt: -1 })
+    .then((ideas) => {
+      const modifiedIdeas = ideas.map(idea =>
         ({updatedAt: moment.unix(idea.updatedAt).fromNow(), _id: idea._id, title: idea.title, detail: idea.detail})
-    );
-    res.render('ideas', {title: 'Ideas Page', auth: true, ideas: modifiedIdeas});
+      );
+      res.status(200).send(ideas);
+      res.render('ideas', {title: 'Ideas Page', auth: true, ideas: modifiedIdeas});
+    }, (e) => {
+      res.status(400).send(e);
+    });
   }, (e) => {
-    res.status(400).send(e);
-  });
-}, (e) => {
-  console.log("Error in get /ideas");
+    console.log("Error in get /ideas");
 });
 
 app.get('/idea/add', (req, res) => {
   res.render('add', {title: 'Add Page', auth: true});
 });
 
-app.post('/idea/add', (req, res) => {
+app.post('/idea/add', authenticate, (req, res) => {
   console.log("Route Called!" + req.body.title + " " + req.body.detail);
   let idea = new Idea({
     title: req.body.title,
     detail: req.body.detail,
-    updatedAt: moment().unix()
+    updatedAt: moment().unix(),
+    _creator: req.user._id,
   });
   idea.save().then((doc) => {
     res.send(doc);
@@ -72,7 +76,7 @@ app.get('/idea/edit/:id', (req, res) => {
   })
 });
 
-app.put('/idea/edit/:id', (req, res) => {
+app.put('/idea/edit/:id',authenticate, (req, res) => {
   let id = req.params.id;
   let body = _.pick(req.body, ['title', 'detail']);
 
@@ -81,7 +85,7 @@ app.put('/idea/edit/:id', (req, res) => {
   }
 
   Idea.findOneAndUpdate(
-    {_id :id},
+    {_id :id, _creator: req.user._id},
     {$set: body},
     {new: true})
     .then((idea) => {
@@ -94,13 +98,14 @@ app.put('/idea/edit/:id', (req, res) => {
   })
 });
 
-app.delete('/ideas/:id', (req, res) => {
+app.delete('/ideas/:id', authenticate, (req, res) => {
   let id = req.params.id;
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
   }
   Idea.findOneAndRemove({
-    _id: id
+    _id: id,
+    _creator: req.user._id
   }).then((idea) => {
     if (!idea) {
       return res.status(404).send();
@@ -113,6 +118,17 @@ app.delete('/ideas/:id', (req, res) => {
 
 app.get('/login', (req, res) => {
   res.render('login', {title: 'Login Page'});
+});
+
+app.post('/users/login', (req, res) => {
+  let body = _.pick(req.body, ['email', 'password']);
+  User.findByCredentials(body.email, body.password).then((user) => {
+    return user.generateAuthToken().then((token) => {
+      res.header('x-auth', token).send(user);
+    });
+  }).catch((e) => {
+    res.status(400).send();
+  })
 });
 
 app.get('/register', (req, res) => {
@@ -129,6 +145,14 @@ app.post('/register', (req, res) => {
     res.header('x-auth', token).send(user);
   }).catch((e) => {
     res.status(400).send(e);
+  })
+});
+
+app.delete('/users/me/token', authenticate, (req, res) => {
+  req.user.removeToken(req.token).then(() => {
+    res.status(200).send();
+  }).catch((e) => {
+    res.status(400).send();
   })
 });
 
