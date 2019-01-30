@@ -24,7 +24,7 @@
   }
 
   function deleteIdea(elm) {
-    fetch("http://localhost:3000/ideas/" + elm.id, {
+    fetch("http://localhost:3000/idea/" + elm.id, {
       method: 'delete'
     })
         .then(response => response.json())

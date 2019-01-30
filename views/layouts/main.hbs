@@ -16,6 +16,10 @@
   <title>{{ title }}</title>
 </head>
 <body>
+<div class="container">
+  <div id="alert" style="position: fixed; top: 1rem; right: 1rem; z-index: 999;">
+  </div>
+</div>
 <header>
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
@@ -27,9 +31,11 @@
 
       <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
         <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
-          <li class="nav-item">
-            <a class="nav-link" href="/">Home<span class="sr-only">(current)</span></a>
-          </li>
+          {{#if auth}}
+            <li class="nav-item">
+              <a class="nav-link" href="/home">Home<span class="sr-only">(current)</span></a>
+            </li>
+          {{/if}}
           <li class="nav-item">
             <a class="nav-link" href="/about">About</a>
           </li>
@@ -48,7 +54,7 @@
             </li>
 
             <li class="nav-item">
-              <a class="nav-link" href="/">Logout</a>
+              <button class="btn" onclick="logout()" role="button">Logout</button>
             </li>
           {{else}}
             <li class="nav-item">
@@ -67,5 +73,39 @@
 <main>
   {{{ body }}}
 </main>
+
+<script>
+  function logout() {
+    fetch("http://localhost:3000/logout/me/", {
+      method: 'delete'
+    })
+    .then(function (data) {
+      if (data.status === 200) {
+        window.location.replace("http://localhost:3000/");
+      }
+      else {
+        return showAlert('alert-warning', 'Problem Logging out Server Error.');
+      }
+    })
+    .catch(function (error) {
+      return showAlert('alert-warning', 'Problem Logging out. Check Internet connection');
+    });
+  }
+
+  function stopPageRefresh() {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  function showAlert(type, text) {
+    $('.alert').alert();
+    document.getElementById('alert').innerHTML = `<div class="alert ${type} alert-dismissible fade show"  id="alert" role="alert">
+              <div id="alert-text">${text}</div>
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>`;
+  }
+</script>
 </body>
 </html>

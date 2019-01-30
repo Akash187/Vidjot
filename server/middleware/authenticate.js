@@ -1,7 +1,7 @@
 const {User} = require('./../modals/user');
 
 let authenticate = (req, res, next) => {
-  let token = req.header('x-auth');
+  let token = req.cookies['x-auth'];
 
   User.findByToken(token).then((user) => {
     if(!user){

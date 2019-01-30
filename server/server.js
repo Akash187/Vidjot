@@ -4,20 +4,28 @@ const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const moment = require('moment');
 const _ = require('lodash');
+require('dotenv').config();
 const {authenticate} = require("./middleware/authenticate");
+const cookieParser = require('cookie-parser');
 
 const {mongoose} = require('./db/mongoose');
 const {Idea} = require('./modals/idea');
 const {User} = require("./modals/user");
 const app = express();
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.use(express.static('public'));
 app.engine('hbs', exphbs({defaultLayout: 'main.hbs'}));
 app.set('view engine', 'hbs');
 
 app.get('/', (req, res) => {
+  res.render('index', {title: 'Home Page', auth: false});
+});
+
+app.get('/home', authenticate, (req, res) => {
   res.render('index', {title: 'Home Page', auth: true});
 });
 
@@ -32,7 +40,7 @@ app.get('/ideas', authenticate, (req, res) => {
       const modifiedIdeas = ideas.map(idea =>
         ({updatedAt: moment.unix(idea.updatedAt).fromNow(), _id: idea._id, title: idea.title, detail: idea.detail})
       );
-      res.status(200).send(ideas);
+      //res.status(200).send(ideas);
       res.render('ideas', {title: 'Ideas Page', auth: true, ideas: modifiedIdeas});
     }, (e) => {
       res.status(400).send(e);
@@ -41,7 +49,7 @@ app.get('/ideas', authenticate, (req, res) => {
     console.log("Error in get /ideas");
 });
 
-app.get('/idea/add', (req, res) => {
+app.get('/idea/add', authenticate, (req, res) => {
   res.render('add', {title: 'Add Page', auth: true});
 });
 
@@ -76,7 +84,7 @@ app.get('/idea/edit/:id', (req, res) => {
   })
 });
 
-app.put('/idea/edit/:id',authenticate, (req, res) => {
+app.put('/idea/edit/:id', authenticate, (req, res) => {
   let id = req.params.id;
   let body = _.pick(req.body, ['title', 'detail']);
 
@@ -98,7 +106,7 @@ app.put('/idea/edit/:id',authenticate, (req, res) => {
   })
 });
 
-app.delete('/ideas/:id', authenticate, (req, res) => {
+app.delete('/idea/:id', authenticate, (req, res) => {
   let id = req.params.id;
   if (!ObjectID.isValid(id)) {
     return res.status(404).send();
@@ -124,7 +132,7 @@ app.post('/users/login', (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
-      res.header('x-auth', token).send(user);
+      res.cookie('x-auth', token).send({...user});
     });
   }).catch((e) => {
     res.status(400).send();
@@ -142,24 +150,26 @@ app.post('/register', (req, res) => {
   user.save().then(() => {
     return user.generateAuthToken();
   }).then((token) => {
-    res.header('x-auth', token).send(user);
+    res.cookie('x-auth', token).send({...user});
+    //res.header('x-auth', token).send();
   }).catch((e) => {
     res.status(400).send(e);
   })
 });
 
-app.delete('/users/me/token', authenticate, (req, res) => {
+app.delete('/logout/me/', authenticate, (req, res) => {
   req.user.removeToken(req.token).then(() => {
+    res.clearCookie('x-auth');
     res.status(200).send();
   }).catch((e) => {
     res.status(400).send();
   })
 });
 
-app.get('/users/me', authenticate, (req, res) => {
-  res.send(req.user);
-});
+// app.get('/users/me', authenticate, (req, res) => {
+//   res.send(req.user);
+// });
 
-app.listen(3000, () => {
+app.listen(port, () => {
   console.log('Server started at part 3000');
 });
