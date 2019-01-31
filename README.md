@@ -32,7 +32,7 @@ npm install
 * Express.Js
 * MongoDB
 * Mongoose
-* Materialize
+* Bootstrap 4.1.3
 * Handlebars
 * Bcrypt
 * JWT(JsonWebTokens)
