@@ -11,7 +11,9 @@ let authenticate = (req, res, next) => {
     req.token = token;
     next();
   }).catch((e) => {
-    res.status(401).send();
+    //res.status(401).send();
+    res.redirect('/');
+    //res.render('index', {title: 'Home Page', auth: false});
   })
 };
 

@@ -5,14 +5,12 @@ let Idea = mongoose.model('Idea', {
     type: String,
     required: true,
     minlength: 1,
-    unique: true,
     trim: true
   },
   detail: {
     type: String,
     required: true,
     minlength: 1,
-    unique: true,
     trim: true
   },
   updatedAt: {

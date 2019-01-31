@@ -1,5 +1,6 @@
 const express = require('express');
 const exphbs = require('express-handlebars');
+const path = require('path');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const moment = require('moment');
@@ -17,12 +18,17 @@ const port = process.env.PORT || 3000;
 app.use(bodyParser.json());
 app.use(cookieParser());
 
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, '../public')));
 app.engine('hbs', exphbs({defaultLayout: 'main.hbs'}));
 app.set('view engine', 'hbs');
 
 app.get('/', (req, res) => {
-  res.render('index', {title: 'Home Page', auth: false});
+  let token = req.cookies['x-auth'];
+  if(!token) {
+    res.render('index', {title: 'Home Page', auth: false});
+  }else{
+    res.redirect('/home');
+  }
 });
 
 app.get('/home', authenticate, (req, res) => {
@@ -54,7 +60,6 @@ app.get('/idea/add', authenticate, (req, res) => {
 });
 
 app.post('/idea/add', authenticate, (req, res) => {
-  console.log("Route Called!" + req.body.title + " " + req.body.detail);
   let idea = new Idea({
     title: req.body.title,
     detail: req.body.detail,
@@ -125,14 +130,20 @@ app.delete('/idea/:id', authenticate, (req, res) => {
 });
 
 app.get('/login', (req, res) => {
-  res.render('login', {title: 'Login Page'});
+  let token = req.cookies['x-auth'];
+  if(!token) {
+    res.render('login', {title: 'Login Page'});
+  }else{
+    res.redirect('/home');
+  }
 });
 
 app.post('/users/login', (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
-      res.cookie('x-auth', token).send({...user});
+      res.cookie('x-auth', token);
+      res.redirect('/home');
     });
   }).catch((e) => {
     res.status(400).send();
@@ -140,7 +151,12 @@ app.post('/users/login', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  res.render('register', {title: 'Register Page'});
+  let token = req.cookies['x-auth'];
+  if(!token) {
+    res.render('register', {title: 'Register Page'});
+  }else{
+    res.redirect('/home');
+  }
 });
 
 app.post('/register', (req, res) => {
@@ -150,7 +166,7 @@ app.post('/register', (req, res) => {
   user.save().then(() => {
     return user.generateAuthToken();
   }).then((token) => {
-    res.cookie('x-auth', token).send({...user});
+    res.cookie('x-auth', token).send({user});
     //res.header('x-auth', token).send();
   }).catch((e) => {
     res.status(400).send(e);
@@ -164,6 +180,10 @@ app.delete('/logout/me/', authenticate, (req, res) => {
   }).catch((e) => {
     res.status(400).send();
   })
+});
+
+app.get('*', (req, res) => {
+  res.render('404', {layout: false});
 });
 
 // app.get('/users/me', authenticate, (req, res) => {

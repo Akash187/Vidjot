@@ -19,6 +19,7 @@
 
 <script>
   function submitIdea() {
+    stopPageRefresh();
     let title = document.getElementById('inputTitle').value;
     let detail = document.getElementById('inputDetail').value;
     fetch('http://localhost:3000/idea/add', {
@@ -34,7 +35,7 @@
     })
     .then(function (data) {
       if(data.status === 200) {
-        console.log('Request success: ', data);
+        showAlert('alert-success', 'Successfully added new Idea.');
         window.location.replace("http://localhost:3000/ideas");
       }
       else{
