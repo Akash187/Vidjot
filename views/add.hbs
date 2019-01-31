@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-body">
       <h4 class="card-title font-weight-bold">Video Idea</h4>
-      <form onsubmit="submitIdea()">
+      <form onsubmit="return false">
         <div class="form-group">
           <label for="inputTitle">Title</label>
           <input type="text" class="form-control" id="inputTitle" required>
@@ -11,7 +11,7 @@
           <label for="inputDetail">Detail</label>
           <textarea class="form-control" id="inputDetail" rows="5" required></textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" onclick="submitIdea()" class="btn btn-primary">Submit</button>
       </form>
     </div>
   </div>
@@ -19,7 +19,6 @@
 
 <script>
   function submitIdea() {
-    stopPageRefresh();
     let title = document.getElementById('inputTitle').value;
     let detail = document.getElementById('inputDetail').value;
     fetch('http://localhost:3000/idea/add', {
