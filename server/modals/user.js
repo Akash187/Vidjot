@@ -4,15 +4,7 @@ const jwt = require('jsonwebtoken');
 const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
-// {
-//   email: "andrew@example.com",
-//   password: 'sdfdagfgvfgrgfvrdff',
-//   tokens: [{
-//     access: 'auth',
-//     token: 'dfgfdgrtgvtgfgtrgfbfgghfgsgfbfgg'
-//   }]
-// }
-
+//Mongoose schema for users model
 let UserSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -79,9 +71,6 @@ UserSchema.statics.findByToken = function (token) {
   try{
     decoded = jwt.verify(token, process.env.JWT_SECRET);
   }catch(e){
-    // return new Promise((resolve, reject) => {
-    //   reject();
-    // });
     return Promise.reject('');
   }
   return User.findOne({
@@ -117,7 +106,6 @@ UserSchema.pre('save', function (next) {
   if(user.isModified('password')){
     bcrypt.genSalt(10, (err, salt) => {
       bcrypt.hash(user.password, salt, (err, hash) => {
-        // Store hash in your password DB.
         user.password = hash;
         next();
       });

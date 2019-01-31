@@ -1,18 +1,17 @@
 let mongoose = require('mongoose');
 
+//Mongoose model for ideas
 let Idea = mongoose.model('Idea', {
   title: {
     type: String,
     required: true,
     minlength: 1,
-    unique: true,
     trim: true
   },
   detail: {
     type: String,
     required: true,
     minlength: 1,
-    unique: true,
     trim: true
   },
   updatedAt: {

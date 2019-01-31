@@ -24,13 +24,14 @@
   }
 
   function deleteIdea(elm) {
-    fetch("http://localhost:3000/idea/" + elm.id, {
+    fetch("https://vidjot101.herokuapp.com/idea/" + elm.id, {
       method: 'delete'
     })
-        .then(response => response.json())
-        .then((data) => {
-          location.reload();
-        })
-        .catch(e => console.log('Error Deleting item', e));
+    .then(response => response.json())
+    .then((data) => {
+      showAlert('alert-success', 'Successfully deleted the Idea.');
+      location.reload();
+    })
+    .catch(e => showAlert('alert-warning', 'Problem deleting the Idea.'));
   }
 </script>

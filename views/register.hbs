@@ -34,8 +34,8 @@
 </div>
 
 <script>
-  // Example starter JavaScript for disabling form submissions if there are invalid fields
 
+  //method to submit registration form
   function submitForm() {
     let name = document.getElementById('inputName').value;
     let email = document.getElementById('inputEmail').value;
@@ -48,7 +48,7 @@
 
     if (validPassword && password === confirmPassword && name && email) {
       stopPageRefresh();
-      fetch('http://localhost:3000/register', {
+      fetch('https://vidjot101.herokuapp.com/register', {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
@@ -59,16 +59,23 @@
           password
         })
       })
-      .then(function (data) {
-        if (data.status === 200) {
-          window.location.replace("http://localhost:3000/home");
+      .then((data) => data.json())
+      .then((data) => {
+        console.log(data);
+        if (data.user) {
+          showAlert('alert-success', 'Registration Successful.');
+          window.location.assign('/home');
+        }else if(data.name === "ValidationError"){
+          return showAlert('alert-warning', 'Not a valid Email.');
+        }else if(data.name === "MongoError"){
+          return showAlert('alert-warning', "Email already exists.");
         }
         else {
-          return showAlert('alert-warning', 'Problem Registering Server Error.');
+          return showAlert('alert-warning', 'Problem Registering.');
         }
       })
       .catch(function (error) {
-          return showAlert('alert-warning', 'Problem Registering. Check Internet connection');
+        return showAlert('alert-warning', 'Problem Registering. Check Internet connection');
       });
     }
     else {
@@ -77,7 +84,6 @@
         return showAlert('alert-warning', 'Password must be at least 6 characters.');
       }
       if (password !== confirmPassword) {
-
         return showAlert('alert-warning', 'Password did not Match.');
       }
     }
