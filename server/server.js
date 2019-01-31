@@ -4,7 +4,6 @@ const path = require('path');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
 const moment = require('moment');
-const cors = require('cors');
 const _ = require('lodash');
 require('dotenv').config();
 const {authenticate} = require("./middleware/authenticate");
@@ -16,7 +15,6 @@ const {User} = require("./modals/user");
 const app = express();
 const port = process.env.PORT || 3000;
 
-app.use(cors());
 app.use(bodyParser.json());
 app.use(cookieParser());
 
@@ -49,7 +47,7 @@ app.get('/ideas', authenticate, (req, res) => {
       const modifiedIdeas = ideas.map(idea =>
         ({updatedAt: moment.unix(idea.updatedAt).fromNow(), _id: idea._id, title: idea.title, detail: idea.detail})
       );
-      res.render('ideas', {title: 'Ideas Page', auth: true});
+      res.render('ideas', {title: 'Ideas Page', auth: true, ideas: modifiedIdeas});
     }, (e) => {
       res.status(400).send(e);
     });
@@ -143,6 +141,7 @@ app.post('/users/login', (req, res) => {
   let body = _.pick(req.body, ['email', 'password']);
   User.findByCredentials(body.email, body.password).then((user) => {
     return user.generateAuthToken().then((token) => {
+      //cookie that will expire in one week (604800000 milliseconds).
       res.cookie('x-auth', token, { maxAge: 604800000, httpOnly: true, secure: true});
       res.cookie('name', user.name, { maxAge: 604800000, httpOnly: true, secure: true});
     });
