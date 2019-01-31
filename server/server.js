@@ -153,9 +153,10 @@ app.post('/users/login', (req, res) => {
       //cookie that will expire in one week (604800000 milliseconds).
       res.cookie('x-auth', token, { maxAge: 604800000, httpOnly: true, secure: true});
       res.cookie('name', user.name, { maxAge: 604800000, httpOnly: true, secure: true});
+      res.send({user});
     });
   }).catch((e) => {
-    res.status(400).send();
+    res.status(400).send(e);
   })
 });
 

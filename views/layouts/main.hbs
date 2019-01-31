@@ -95,11 +95,6 @@
     });
   }
 
-  function stopPageRefresh() {
-    event.preventDefault();
-    event.stopPropagation();
-  }
-
   function showAlert(type, text) {
     $('.alert').alert();
     document.getElementById('alert').innerHTML = `<div class="alert ${type} alert-dismissible fade show"  id="alert" role="alert">

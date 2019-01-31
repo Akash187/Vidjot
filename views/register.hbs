@@ -3,7 +3,7 @@
     <div class="card-body">
       <img src="images/logo.png" class="rounded mx-auto d-block" alt="website logo" style="width: 10rem">
       <h4 class="card-title text-center font-weight-bold">Account Register</h4>
-      <form class="needs-validation" novalidate onsubmit="submitForm()">
+      <form class="needs-validation" novalidate onsubmit="return false">
         <div class="form-group">
           <label for="inputName">Name</label>
           <input type="text" class="form-control" id="inputName" aria-describedby="nameHelp" required>
@@ -27,7 +27,7 @@
           <label for="inputPassword2">Confirm Password</label>
           <input type="password" class="form-control" id="inputPassword2" required>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" onclick="submitForm()" class="btn btn-primary">Submit</button>
       </form>
     </div>
   </div>
@@ -47,7 +47,6 @@
     document.getElementsByClassName('needs-validation')[0].classList.add('was-validated');
 
     if (validPassword && password === confirmPassword && name && email) {
-      stopPageRefresh();
       fetch('https://vidjot101.herokuapp.com/register', {
         method: 'POST',
         headers: {
@@ -79,7 +78,6 @@
       });
     }
     else {
-      stopPageRefresh();
       if (!validPassword && password) {
         return showAlert('alert-warning', 'Password must be at least 6 characters.');
       }

@@ -1,4 +1,4 @@
-# VidJot Project - Node.Js
+# VidJot Project - Node.js
 
 A Node.js based app to list idea for YouTube video with authentication and full CRUD operation.
 

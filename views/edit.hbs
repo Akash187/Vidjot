@@ -2,7 +2,7 @@
   <div class="card">
     <div class="card-body">
       <h4 class="card-title font-weight-bold">Video Idea</h4>
-      <form onsubmit="editIdea(this)" id="{{id}}">
+      <form onsubmit="return false">
         <div class="form-group">
           <label for="inputTitle">Title</label>
           <input type="text" class="form-control" id="inputTitle" value="{{ideaTitle}}" required>
@@ -11,7 +11,7 @@
           <label for="inputDetail">Detail</label>
           <textarea class="form-control" id="inputDetail" rows="5" required>{{ideaDetail}}</textarea>
         </div>
-        <button type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" onclick="editIdea(this)" id="{{id}}" class="btn btn-primary">Submit</button>
       </form>
     </div>
   </div>
@@ -19,8 +19,6 @@
 
 <script>
   function editIdea(elm) {
-    event.preventDefault();
-    event.stopPropagation();
     let title = document.getElementById('inputTitle').value;
     let detail = document.getElementById('inputDetail').value;
     console.log(title + " " + detail);
