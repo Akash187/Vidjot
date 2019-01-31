@@ -25,7 +25,7 @@ app.set('view engine', 'hbs');
 app.get('/', (req, res) => {
   let token = req.cookies['x-auth'];
   if(!token) {
-    res.render('index', {title: 'Home Page', auth: false});
+    res.render('index', {title: 'Home Page'});
   }else{
     res.redirect('/home');
   }
@@ -37,7 +37,13 @@ app.get('/home', authenticate, (req, res) => {
 });
 
 app.get('/about', (req, res) => {
-  res.render('about', {title: 'About Page'});
+  let name = req.cookies['name'];
+  let token = req.cookies['x-auth'];
+  if(!token) {
+    res.render('about', {title: 'About Page'});
+  }else{
+    res.render('about', {title: 'About Page', auth: true, name});
+  }
 });
 
 app.get('/ideas', authenticate, (req, res) => {
@@ -47,7 +53,8 @@ app.get('/ideas', authenticate, (req, res) => {
       const modifiedIdeas = ideas.map(idea =>
         ({updatedAt: moment.unix(idea.updatedAt).fromNow(), _id: idea._id, title: idea.title, detail: idea.detail})
       );
-      res.render('ideas', {title: 'Ideas Page', auth: true, ideas: modifiedIdeas});
+      let name = req.cookies['name'];
+      res.render('ideas', {title: 'Ideas Page', auth: true, ideas: modifiedIdeas, name});
     }, (e) => {
       res.status(400).send(e);
     });
@@ -56,7 +63,8 @@ app.get('/ideas', authenticate, (req, res) => {
 });
 
 app.get('/idea/add', authenticate, (req, res) => {
-  res.render('add', {title: 'Add Page', auth: true});
+  let name = req.cookies['name'];
+  res.render('add', {title: 'Add Page', auth: true, name});
 });
 
 app.post('/idea/add', authenticate, (req, res) => {
@@ -82,7 +90,8 @@ app.get('/idea/edit/:id', (req, res) => {
       if (!idea) {
         return res.status(404).send();
       }
-      res.render('edit', {ideaTitle: idea[0].title, ideaDetail: idea[0].detail, id: idea[0]._id, auth: true});
+      let name = req.cookies['name'];
+      res.render('edit', {ideaTitle: idea[0].title, ideaDetail: idea[0].detail, id: idea[0]._id, auth: true, name});
     }).catch((e) => {
     res.status(400).send();
   })
